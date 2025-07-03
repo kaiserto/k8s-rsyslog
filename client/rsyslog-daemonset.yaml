@@ -26,6 +26,8 @@ spec:
           value: "514"
         - name: RSYSLOG_PROTOCOL
           value: tcp
+        - name: CLUSTER_NAME
+          value: agentes_stage_dev
         command:
           - bash
           - /docker-entrypoint.sh

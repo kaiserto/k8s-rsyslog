@@ -25,7 +25,7 @@ data:
 
         action(type="mmkubernetes")
 
-        set $!cluster_name = 'agentes_stage_dev';
+        set $!cluster_name = "${CLUSTER_NAME}";
         # set $!kube!namespace_name = $!kubernetes!namespace_name;
         # set $!kube!pod_name = $!kubernetes!pod_name;
 
