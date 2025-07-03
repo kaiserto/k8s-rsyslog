@@ -1,0 +1,15 @@
+/var/log/k8s//*.log
+/var/log/k8s/*/*.log
+/var/log/k8s/*/*/*.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    create 0640 root k8s-logs
+    sharedscripts
+    postrotate
+        /bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>&1 || true
+    endscript
+}
+

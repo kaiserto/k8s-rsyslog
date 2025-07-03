@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rsyslog-client
+spec:
+  selector:
+    matchLabels:
+      app: rsyslog-client
+  template:
+    metadata:
+      labels:
+        app: rsyslog-client
+    spec:
+      serviceAccountName: rsyslog-agent
+      # hostNetwork: true
+      containers:
+      - name: rsyslog
+        image: rsyslog/rsyslog:latest
+        env:
+        - name: TZ
+          value: UTC
+        - name: RSYSLOG_TARGET
+          value: k8s-hq.agentes-it.com
+        - name: RSYSLOG_PORT
+          value: "514"
+        - name: RSYSLOG_PROTOCOL
+          value: tcp
+        command:
+          - bash
+          - /docker-entrypoint.sh
+          - rsyslogd
+          - '-n'
+          - '-f'
+          - /etc/rsyslog.conf
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-containers
+          mountPath: /var/lib/docker/containers
+        - name: container-logs
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: pod-logs
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: rsyslog-client-config
+          mountPath: /etc/rsyslog.d/90-k8s-client.conf.template
+          subPath: 90-k8s-client.conf.template
+        - name: rsyslog-client-config
+          mountPath: /docker-entrypoint.sh
+          subPath: docker-entrypoint.sh
+      volumes:
+      - name: docker-containers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: container-logs
+        hostPath:
+          path: /var/log/containers
+      - name: pod-logs
+        hostPath:
+          path: /var/log/pods
+      - name: rsyslog-client-config
+        configMap:
+          name: rsyslog-client-config
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+---

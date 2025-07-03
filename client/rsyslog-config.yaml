@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rsyslog-client-config
+data:
+  90-k8s-client.conf.template: |
+    global(
+        maxMessageSize="64k"
+    )
+
+    module(load="imfile")
+    module(load="mmjsonparse")
+    module(load="mmkubernetes"
+        tls.cacert="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        tokenfile="/var/run/secrets/kubernetes.io/serviceaccount/token"
+    )
+
+    template(name="all-json-template" type="string"
+        string="%$!all-json:json%\n"
+    )
+
+    ruleset(name="k8s-client") {
+        action(type="mmjsonparse" cookie="")
+
+        action(type="mmkubernetes")
+
+        set $!cluster_name = 'agentes_stage_dev';
+        # set $!kube!namespace_name = $!kubernetes!namespace_name;
+        # set $!kube!pod_name = $!kubernetes!pod_name;
+
+        # unset $!kubernetes;
+        # set $!kubernetes = $!kube;
+        # unset $!kube;
+
+        unset $!stream;
+        unset $!time;
+        unset $!metadata;
+        unset $!docker;
+
+        action(
+            type="omfwd"
+            template="all-json-template"
+            target="${RSYSLOG_TARGET}"
+            port="${RSYSLOG_PORT}"
+            protocol="${RSYSLOG_PROTOCOL}"
+        )
+    }
+
+    input(type="imfile"
+        file="/var/log/containers/*.log"
+        ruleset="k8s-client"
+        tag="k8s:"
+    )
+
+  docker-entrypoint.sh: |
+    #!/bin/bash
+
+    apt update
+    dpkg -l gettext-base >& /dev/null || apt -y install gettext-base
+    dpkg -l rsyslog-kubernetes >& /dev/null || apt -y install rsyslog-kubernetes
+
+    envsubst < /etc/rsyslog.d/90-k8s-client.conf.template > /etc/rsyslog.d/90-k8s-client.conf
+
+    exec "$@"
+---

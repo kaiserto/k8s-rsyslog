@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rsyslog-client
+spec:
+  selector:
+    matchLabels:
+      app: rsyslog-client
+  template:
+    metadata:
+      labels:
+        app: rsyslog-client
+    spec:
+      hostNetwork: true
+      containers:
+      - name: rsyslog
+        image: rsyslog/rsyslog:latest
+        command:
+          - bash
+          - -c
+          - |
+            apt update && apt -y install rsyslog-kubernetes
+            rsyslogd -n -f /etc/rsyslog.conf
+        securityContext:
+          privileged: true
+---
