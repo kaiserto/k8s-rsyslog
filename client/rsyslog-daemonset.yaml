@@ -50,6 +50,9 @@ spec:
           mountPath: /etc/rsyslog.d/90-k8s-client.conf.template
           subPath: 90-k8s-client.conf.template
         - name: rsyslog-client-config
+          mountPath: /etc/sysctl.d/90-inotify.conf
+          subPath: 90-inotify.conf
+        - name: rsyslog-client-config
           mountPath: /docker-entrypoint.sh
           subPath: docker-entrypoint.sh
       volumes:

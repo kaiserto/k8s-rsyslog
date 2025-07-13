@@ -53,6 +53,9 @@ data:
         tag="k8s:"
     )
 
+  90-inotify.conf: |
+    fs.inotify.max_user_watches = 131072
+
   docker-entrypoint.sh: |
     #!/bin/bash
 
@@ -61,6 +64,10 @@ data:
     dpkg -l rsyslog-kubernetes >& /dev/null || apt -y install rsyslog-kubernetes
 
     envsubst < /etc/rsyslog.d/90-k8s-client.conf.template > /etc/rsyslog.d/90-k8s-client.conf
+
+    sysctl -p /etc/sysctl.d/90-inotify.conf
+    # echo '131072' > /proc/sys/fs/inotify/max_user_watches
+    # (while true; do sleep $[6*60*60]; kill -HUP 1; done) &> /dev/null &
 
     exec "$@"
 ---
