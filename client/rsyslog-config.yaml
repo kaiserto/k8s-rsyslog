@@ -9,7 +9,10 @@ data:
         maxMessageSize="64k"
     )
 
-    module(load="imfile")
+    module(load="imfile"
+        mode="polling"
+        pollinginterval="3"
+    )
     module(load="mmjsonparse")
     module(load="mmkubernetes"
         tls.cacert="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -51,6 +54,7 @@ data:
         file="/var/log/containers/*.log"
         ruleset="k8s-client"
         tag="k8s:"
+        reopenontruncate="on"
     )
 
   90-inotify.conf: |
@@ -67,7 +71,7 @@ data:
 
     sysctl -p /etc/sysctl.d/90-inotify.conf
     # echo '131072' > /proc/sys/fs/inotify/max_user_watches
-    # (while true; do sleep $[6*60*60]; kill -HUP 1; done) &> /dev/null &
+    ### (while true; do sleep $[6*60*60]; kill -HUP 1; done) &> /dev/null &
 
     exec "$@"
 ---
