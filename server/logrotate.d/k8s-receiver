@@ -1,4 +1,4 @@
-/var/log/k8s//*.log
+/var/log/k8s/*.log
 /var/log/k8s/*/*.log
 /var/log/k8s/*/*/*.log {
     daily
@@ -8,6 +8,7 @@
     missingok
     notifempty
     create 0660 root k8s-logs
+    su root k8s-logs
     sharedscripts
     postrotate
         /bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>&1 || true
