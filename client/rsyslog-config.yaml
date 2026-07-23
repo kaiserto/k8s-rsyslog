@@ -6,7 +6,8 @@ metadata:
 data:
   90-k8s-client.conf.template: |
     global(
-        maxMessageSize="64k"
+        compatibility.defaults.secure="strict"
+        maxMessageSize="1m"
     )
 
     module(load="imfile"
@@ -54,6 +55,7 @@ data:
         file="/var/log/containers/*.log"
         ruleset="k8s-client"
         tag="k8s:"
+        readMode="2"
         reopenontruncate="on"
     )
 

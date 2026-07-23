@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rsyslog-clients-restart
+spec:
+  schedule: "0 3 * * 0"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          serviceAccountName: rsyslog-restarter
+          restartPolicy: Never
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            env:
+            - name: TARGET_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            command:
+            - /bin/sh
+            - -c
+            - kubectl rollout restart daemonset/rsyslog-client -n "$TARGET_NAMESPACE"
+

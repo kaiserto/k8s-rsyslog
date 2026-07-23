@@ -37,6 +37,7 @@ spec:
           - /etc/rsyslog.conf
         securityContext:
           privileged: true
+          runAsUser: 0
         volumeMounts:
         - name: docker-containers
           mountPath: /var/lib/docker/containers
